@@ -1,12 +1,18 @@
 package com.example.lb10;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +26,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ContentFragment extends Fragment {
     private FragmentContentBinding binding;
@@ -39,6 +48,53 @@ public class ContentFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        binding.btnCreate.setOnClickListener(v -> {
+            Context context = requireContext();
+            EditText text = new EditText(context);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Name")
+                    .setMessage("Введите название файла")
+                    .setView(text)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            filename = text.getText().toString();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(context, "Нажата кнопка 'Cancel'", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            builder.create().show();
+        });
+
+        binding.btnOpen.setOnClickListener(v -> {
+            Context context = requireContext();
+            File dir = requireContext().getDir("texts", Context.MODE_PRIVATE);
+            List<String> files = Arrays.stream(dir.listFiles()).filter(it -> it.isFile())
+                    .map(it -> it.getName()).collect(Collectors.toList());
+            String[] filenames = files.toArray(new String[0]);
+            DialogInterface.OnClickListener aboba = (dialog, which) -> {};
+            new AlertDialog.Builder(context)
+                    .setTitle("Name")
+                    .setMessage("Введите название файла")
+                    .setSingleChoiceItems(filenames, 0, aboba)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(context, "Нажата кнопка 'Cancel'", Toast.LENGTH_SHORT).show();
+                        }
+                    }).create().show();
+        });
+
         super.onViewCreated(view, savedInstanceState);
         GetOrCreateDir();
         File dir = requireContext().getDir("texts", Context.MODE_PRIVATE);
@@ -51,7 +107,7 @@ public class ContentFragment extends Fragment {
                 String content = scanner.next();
                 binding.editTextField.setText(content);
                 scanner.close();
-            } catch (FileNotFoundException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -89,4 +145,6 @@ public class ContentFragment extends Fragment {
         directory = context.getDir("texts", Context.MODE_PRIVATE);
         File[] files = directory.listFiles();
     }
+
+
 }
