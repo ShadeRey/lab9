@@ -76,15 +76,32 @@ public class ContentFragment extends Fragment {
             List<String> files = Arrays.stream(dir.listFiles()).filter(it -> it.isFile())
                     .map(it -> it.getName()).collect(Collectors.toList());
             String[] filenames = files.toArray(new String[0]);
-            DialogInterface.OnClickListener aboba = (dialog, which) -> {};
+            DialogInterface.OnClickListener aboba = (dialog, which) -> {
+                if (which >= filenames.length) {
+                    return;
+                }
+                filename = filenames[which];
+            };
             new AlertDialog.Builder(context)
-                    .setTitle("Name")
-                    .setMessage("Введите название файла")
+                    .setTitle("Select file")
                     .setSingleChoiceItems(filenames, 0, aboba)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
+                            File dir = requireContext().getDir("texts", Context.MODE_PRIVATE);
+                            File file = new File(dir, filename);
+                            if (file.exists()) {
+                                try {
+                                    FileInputStream fis = new FileInputStream(file);
+                                    Scanner scanner = new Scanner(fis);
+                                    scanner.useDelimiter("\\Z");
+                                    String content = scanner.next();
+                                    binding.editTextField.setText(content);
+                                    scanner.close();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
